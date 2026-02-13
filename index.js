@@ -4,6 +4,7 @@ const port = process.env.PORT || 5000;
 require('dotenv').config();
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const bcrypt = require('bcryptjs');
 
 
 app.use(cors({
@@ -31,24 +32,34 @@ async function run() {
     const usersCollection = client.db('studySphereDB').collection('users');
 
     //users routes
-    
+
     app.post('/users', async (req, res) => {
       try {
         const data = req.body;
         const users = await usersCollection.find().toArray();
         const isExist = users.find(user => user.email === data.email);
+        const sequrePassword = await bcrypt.hashSync(data.password, 10);
 
         if (isExist) {
           return res.send({ message: 'User already exists' });
         }
+
+        
         const userData = {
           name: data.name,
           email: data.email,
-          photo: data.photo,
+          password: sequrePassword,
+          // photo: data.photo,
           role: data.role, // user | admin
         }
+ 
         const result = await usersCollection.insertOne(userData);
-        res.status(201).json({ _id: result.insertedId, ...userData })
+         res.json({
+      success: true,
+      message: 'User created successfully',
+      data: result
+    })
+
 
       } catch (error) {
         console.log("something went wrong", error)
