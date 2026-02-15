@@ -30,6 +30,48 @@ async function run() {
 
     //all collections
     const usersCollection = client.db('studySphereDB').collection('users');
+    const coursesCollection = client.db('studySphereDB').collection('courses');
+
+    //courses routes
+
+    app.post('/courses', async (req, res) => {
+      try {
+        const data = req.body;
+
+        const coursesInfo = {
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          instructor: data.instructor,
+          price: data.price,
+          image: data.image
+        }
+        const result = await coursesCollection.insertOne(coursesInfo);
+        res.json({
+          success: true,
+          message: 'Course created successfully',
+          data: result
+        })
+      } catch (error) {
+        console.log("something went wrong", error)
+        res.status(500).json({ message: 'Error while creating course' })
+      }
+    });
+
+    app.get('/courses', async (req, res) => {
+      try {
+        const courses = await coursesCollection.find().toArray();
+   
+        res.json({
+          success: true,
+          message: 'Courses fetched successfully',
+          data: courses
+        })
+      } catch (error) {
+        console.log("something went wrong", error)
+        res.status(500).json({ message: 'Error while fetching courses' })
+      }
+    })  
 
     //users routes
 
