@@ -60,12 +60,25 @@ async function run() {
 
     app.get('/courses', async (req, res) => {
       try {
-        const courses = await coursesCollection.find().toArray();
+        const search = req.query.search;
+        console.log(search);
+        const query = {};
+
+        if (search && search.trim() !== "") {
+      query.title = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+        
+
+        const courses = await coursesCollection.find(query).toArray();
+
    
         res.json({
           success: true,
           message: 'Courses fetched successfully',
-          data: courses
+          data: courses,
         })
       } catch (error) {
         console.log("something went wrong", error)
